@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,17 +13,27 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScore;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
+    public static string BestPlayerName;
+    public static int BestPlayerScore = 0;
+    private string CurrentUserName;
+    private void Awake() 
+    {
+        CurrentUserName = MenuManager.Instance.userName;
+        MenuManager.Instance.LoadPlayer();
+        BestScore.text = "Best Score: " + MenuManager.Instance.score + " : " + MenuManager.Instance.lUserName;
+    }
 
-    
     // Start is called before the first frame update
     void Start()
     {
+        
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -58,6 +70,7 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SetBestPlayer();
             }
         }
     }
@@ -65,12 +78,21 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {m_Points}" + " : "+ MenuManager.Instance.GetUserName();
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+    public void SetBestPlayer()
+    {
+        if(m_Points > BestPlayerScore)
+        {
+            BestPlayerName = CurrentUserName;
+            BestPlayerScore = m_Points;
+            MenuManager.Instance.SavePlayer(BestPlayerName,BestPlayerScore);
+        }
     }
 }
